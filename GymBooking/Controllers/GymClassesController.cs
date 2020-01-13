@@ -7,22 +7,66 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GymBooking.Core.Models;
 using GymBooking.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymBooking.Controllers
 {
     public class GymClassesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> userManager;
 
-        public GymClassesController(ApplicationDbContext context)
+        public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            this.userManager = userManager;
         }
 
         // GET: GymClasses
         public async Task<IActionResult> Index()
         {
             return View(await _context.GymClasses.ToListAsync());
+        }
+
+        // Booking
+        [Authorize]
+        public async Task<IActionResult> BookingToggle(int? id)
+        {
+            if (id == null) return NotFound();
+
+            //Hämta den inloggade användarens id
+            var userId = userManager.GetUserId(User);
+
+            //Hämta aktuellt gympass
+            var currentGymClass = await _context.GymClasses
+                .Include(a => a.AttendingMembers)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            //är den aktuella användaren bokad på passet?
+            var attending = currentGymClass.AttendingMembers
+                .FirstOrDefault(u => u.ApplicationUserId == userId);
+
+            //Om inte, boka användaren på passet
+            if(attending == null)
+            {
+                var book = new ApplicationUserGymClass
+                {
+                    ApplicationUserId = userId,
+                    GymClassId = currentGymClass.Id
+                };
+                _context.ApplicationUserGymClasses.Add(book);
+                _context.SaveChanges();
+            }
+
+            //Annars avboka
+            else
+            {
+                _context.ApplicationUserGymClasses.Remove(attending);
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: GymClasses/Details/5
@@ -34,6 +78,8 @@ namespace GymBooking.Controllers
             }
 
             var gymClass = await _context.GymClasses
+                .Include(g => g.AttendingMembers)
+                .ThenInclude(a => a.ApplicationUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (gymClass == null)
             {
@@ -44,6 +90,7 @@ namespace GymBooking.Controllers
         }
 
         // GET: GymClasses/Create
+        [Authorize]
         public IActionResult Create()
         {
             return View();
@@ -54,6 +101,7 @@ namespace GymBooking.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Create([Bind("Id,Name,StartTime,Duration,Description")] GymClass gymClass)
         {
             if (ModelState.IsValid)
@@ -66,6 +114,7 @@ namespace GymBooking.Controllers
         }
 
         // GET: GymClasses/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -86,6 +135,7 @@ namespace GymBooking.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,StartTime,Duration,Description")] GymClass gymClass)
         {
             if (id != gymClass.Id)
@@ -117,6 +167,7 @@ namespace GymBooking.Controllers
         }
 
         // GET: GymClasses/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -137,6 +188,7 @@ namespace GymBooking.Controllers
         // POST: GymClasses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var gymClass = await _context.GymClasses.FindAsync(id);
