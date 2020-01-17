@@ -23,6 +23,8 @@ namespace GymBooking.Areas.Identity.Pages.Account.Manage
             _signInManager = signInManager;
         }
 
+        
+
         public string Username { get; set; }
 
         [TempData]
@@ -33,6 +35,8 @@ namespace GymBooking.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
@@ -40,13 +44,19 @@ namespace GymBooking.Areas.Identity.Pages.Account.Manage
 
         private async Task LoadAsync(ApplicationUser user)
         {
+            var firstName = user.FirstName;
+            var lastName = user.LastName;
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+
+           
 
             Username = userName;
 
             Input = new InputModel
             {
+                FirstName = firstName,
+                LastName = lastName,
                 PhoneNumber = phoneNumber
             };
         }
@@ -75,6 +85,38 @@ namespace GymBooking.Areas.Identity.Pages.Account.Manage
             {
                 await LoadAsync(user);
                 return Page();
+            }
+
+            var firstName = user.FirstName;
+            if(Input.FirstName != firstName)
+            {
+                try
+                {
+                    user.FirstName = Input.FirstName;
+                }
+                catch
+                {
+                    var userId = await _userManager.GetUserIdAsync(user);
+                    throw new InvalidOperationException($"Unexpected error occurred setting first name for user with ID '{userId}'.");
+                }
+
+                Task.WaitAny(_userManager.UpdateAsync(user));
+            }
+            
+            var lastName = user.LastName;
+            if(Input.FirstName != lastName)
+            {
+                try
+                {
+                    user.LastName = Input.LastName;
+                }
+                catch
+                {
+                    var userId = await _userManager.GetUserIdAsync(user);
+                    throw new InvalidOperationException($"Unexpected error occurred setting first name for user with ID '{userId}'.");
+                }
+
+                Task.WaitAny(_userManager.UpdateAsync(user));
             }
 
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);

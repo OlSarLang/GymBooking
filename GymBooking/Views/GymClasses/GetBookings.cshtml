@@ -1,0 +1,60 @@
+﻿@model IEnumerable<GymBooking.Core.Models.GymClass>
+
+@{
+    ViewData["Title"] = "GetBookings";
+}
+
+@inject UserManager<ApplicationUser> userManager;
+
+@{
+    var userId = userManager.GetUserId(User);
+}
+
+<h1>GetBookings</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StartTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Duration)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Duration)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                @if (item.AttendingMembers.Any(a => a.ApplicationUserId == userId))
+                {
+                    <a asp-action="BookingToggle" asp-route-id="@item.Id">Unbook</a>
+                }
+                else
+                {
+                    <a asp-action="BookingToggle" asp-route-id="@item.Id">Book</a>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

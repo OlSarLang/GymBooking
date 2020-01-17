@@ -1,48 +1,71 @@
-﻿@model IEnumerable<GymBooking.Core.Models.GymClass>
+﻿@model IndexViewModel
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>@Html.DisplayNameFor(model => model.Name)</th>
-                <a data-toggle="collapse" href="#memberlist"
-                <th>@Html.DisplayNameFor(model => model.StartTime)</th>
-                <th>@Html.DisplayNameFor(model => model.Duration)</th>
-                <th>@Html.DisplayNameFor(model => model.Description)</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
+@inject UserManager<ApplicationUser> userManager;
+
+@{ 
+    var userId = userManager.GetUserId(User);
+}
+
+            @foreach (var item in Model.GymClasses)
             {
                 <tr>
-                    <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td>
+                        <p>
+                            @Html.DisplayFor(modelItem => item.Name)
+                            @if (User.IsInRole("Member"))
+                            {
+                            <a data-toggle="collapse" href="#memberlist-@item.Id" role="button" aria-expanded="false">
+                                <i class="fa fa-plus"></i>
+                            </a>
+                            }
+
+                        </p>
+
+                        <div class="collapse" id="memberlist-@item.Id">
+
+                            @if (User.IsInRole("Member"))
+                            {
+                                @foreach (var member in item.AttendingMembers.Select(m => m.ApplicationUser))
+                                {
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">@member.FullName</h5>
+                                            <p class="card-text">Lorem ipsum dolor sit amet</p>
+                                            <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-info"></i></a>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </td>
+
                     <td>@Html.DisplayFor(modelItem => item.StartTime)</td>
                     <td>@Html.DisplayFor(modelItem => item.Duration)</td>
                     <td>@Html.DisplayFor(modelItem => item.Description)</td>
                     <td>
-                        <span> | </span>
-                        @if (User.IsInRole("Admin"))
+                        @if (User.IsInRole("Member"))
                         {
-                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                            <span> | </span>
-                        }
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                            <span> | </span>
-                        }
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                            @if (item.AttendingMembers.Any(a => a.ApplicationUserId == userId))
+                            {
+                                <a asp-action="BookingToggle" asp-route-id="@item.Id">Unbook</a>
+                            }
+                            else
+                            {
+                                <a asp-action="BookingToggle" asp-route-id="@item.Id">Book</a>
+                            }
 
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <span> | </span>
-                            <a asp-action="BookingToggle" asp-route-id="@item.Id">Book</a>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <span> | </span>
+                                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a><span> | </span>
+                                <a asp-action="Details" asp-route-id="@item.Id">Details</a><span> | </span>
+                                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                            }
+
                         }
-                        <span> | </span>
                     </td>
                 </tr>
             }
-        </tbody>
-    </table>
-
 

@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymBooking.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200113092340_Database_version1.0")]
-    partial class Database_version10
+    [Migration("20200114105402_Database_version2.0")]
+    partial class Database_version20
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

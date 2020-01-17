@@ -1,6 +1,6 @@
 using System;
 
-namespace GymBooking.Models
+namespace GymBooking.Core.ViewModels
 {
     public class ErrorViewModel
     {

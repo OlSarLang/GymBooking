@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using GymBooking.Core.Models;
+using GymBooking.Core;
 
 namespace GymBooking
 {
@@ -34,14 +35,17 @@ namespace GymBooking
 
             services.AddDefaultIdentity<ApplicationUser>(options =>
              {
-                 options.SignIn.RequireConfirmedAccount = true;
-                 //options.Password.RequireDigit = false;
+                 options.SignIn.RequireConfirmedAccount = false;
+                 options.Password.RequireDigit = false;
+                 options.Password.RequireUppercase = false;
+                 options.Password.RequiredUniqueChars = 0;
              })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
         
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddScoped<IUnitOfWork, UnitOfWork()>;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
