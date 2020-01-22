@@ -14,8 +14,9 @@ namespace GymBooking.Core
         bool GetAny(int id);
         Task<GymClass> GetAsync(int? id);
         Task<List<GymClass>> GetHistoryAsync();
-        Task<GymClass> GetWithMembersAsync(int? id);
+        Task<GymClass> GetWithAttendingMembersAsync(int? id);
         void Remove(GymClass gymClass);
         void Update(GymClass gymClass);
+        Task<IEnumerable<GymClass>> GetAllAsync();
     }
 }

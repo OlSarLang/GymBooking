@@ -1,4 +1,4 @@
-﻿@model IndexViewModel
+﻿@model GymClass
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 @inject UserManager<ApplicationUser> userManager;
@@ -7,26 +7,24 @@
     var userId = userManager.GetUserId(User);
 }
 
-            @foreach (var item in Model.GymClasses)
-            {
                 <tr>
                     <td>
                         <p>
-                            @Html.DisplayFor(modelItem => item.Name)
+                            @Html.DisplayFor(modelItem => Model.Name)
                             @if (User.IsInRole("Member"))
                             {
-                            <a data-toggle="collapse" href="#memberlist-@item.Id" role="button" aria-expanded="false">
+                            <a data-toggle="collapse" href="#memberlist-@Model.Id" role="button" aria-expanded="false">
                                 <i class="fa fa-plus"></i>
                             </a>
                             }
 
                         </p>
 
-                        <div class="collapse" id="memberlist-@item.Id">
+                        <div class="collapse" id="memberlist-@Model.Id">
 
                             @if (User.IsInRole("Member"))
                             {
-                                @foreach (var member in item.AttendingMembers.Select(m => m.ApplicationUser))
+                                @foreach (var member in Model.AttendingMembers.Select(m => m.ApplicationUser))
                                 {
                                     <div class="card">
                                         <div class="card-body text-center">
@@ -40,32 +38,31 @@
                         </div>
                     </td>
 
-                    <td>@Html.DisplayFor(modelItem => item.StartTime)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Duration)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                    <td>@Html.DisplayFor(modelItem => Model.StartTime)</td>
+                    <td>@Html.DisplayFor(modelItem => Model.Duration)</td>
+                    <td>@Html.DisplayFor(modelItem => Model.Description)</td>
                     <td>
                         @if (User.IsInRole("Member"))
                         {
-                            @if (item.AttendingMembers.Any(a => a.ApplicationUserId == userId))
+                            @if (Model.AttendingMembers.Any(a => a.ApplicationUserId == userId))
                             {
-                                <a asp-action="BookingToggle" asp-route-id="@item.Id">Unbook</a>
+                                <a asp-action="BookingToggle" asp-route-id="@Model.Id">Unbook</a>
                             }
                             else
                             {
-                                <a asp-action="BookingToggle" asp-route-id="@item.Id">Book</a>
+                                <a asp-action="BookingToggle" asp-route-id="@Model.Id">Book</a>
                             }
 
 
                             @if (User.IsInRole("Admin"))
                             {
                                 <span> | </span>
-                                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a><span> | </span>
-                                <a asp-action="Details" asp-route-id="@item.Id">Details</a><span> | </span>
-                                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                                <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a><span> | </span>
+                                <a asp-action="Details" asp-route-id="@Model.Id">Details</a><span> | </span>
+                                <a asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
                             }
 
                         }
                     </td>
                 </tr>
-            }
 

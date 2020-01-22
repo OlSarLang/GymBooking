@@ -17,40 +17,45 @@ namespace GymBooking.Controllers
     [Authorize]
     public class GymClassesController : Controller 
     {
-        private UnitOfWork unitOfWork;
+        private IUnitOfWork unitOfWork;
         private readonly UserManager<ApplicationUser> userManager;
 
         public GymClassesController(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork)
         {
 
             this.userManager = userManager;
+            this.unitOfWork = unitOfWork;
         }
 
         // GET: GymClasses
         [AllowAnonymous]
         public async Task<IActionResult> Index(IndexViewModel vm = null)
         {
-            if (vm.History)
+            var model = new IndexViewModel();
+
+            if (!User.Identity.IsAuthenticated)
             {
-                List<GymClass> gym = await unitOfWork.GymRepo.GetHistoryAsync();
-                var model = new IndexViewModel { GymClasses = gym };
+                model.GymClasses = await unitOfWork.GymClasses.GetAllAsync();
                 return View(model);
             }
-
-            List<GymClass> gymClasses = await unitOfWork.GymRepo.GetAllWithUsersAsync();
-            var model2 = new IndexViewModel { GymClasses = gymClasses };
-            return View(model2);
+            if (vm.History)
+            {
+                List<GymClass> gym = await unitOfWork.GymClasses.GetHistoryAsync();
+                model = new IndexViewModel { GymClasses = gym };
+                return View(model);
+            }
+            List<GymClass> gymClasses = await unitOfWork.GymClasses.GetAllWithUsersAsync();
+            model = new IndexViewModel { GymClasses = gymClasses };
+            return View(model);
         }
 
         [Authorize(Roles = "Member")]
         public async Task<IActionResult> GetBookings()
         {
             var userId = userManager.GetUserId(User);
-            List<GymClass> bookings = await unitOfWork.AppUserGymRepo.GetAllBookingsAsync(userId);
+            List<GymClass> bookings = await unitOfWork.UserGymClasses.GetAllBookingsAsync(userId);
             return View(bookings);
         }
-
-        
 
         // Booking
         [Authorize(Roles = "Member")]
@@ -62,7 +67,7 @@ namespace GymBooking.Controllers
             var userId = userManager.GetUserId(User);
 
             //Hämta aktuellt gympass
-            GymClass currentGymClass = await unitOfWork.GymRepo.GetWithMembersAsync(id);
+            GymClass currentGymClass = await unitOfWork.GymClasses.GetWithMembersAsync(id);
 
             //är den aktuella användaren bokad på passet?
             var attending = currentGymClass.AttendingMembers
@@ -76,14 +81,14 @@ namespace GymBooking.Controllers
                     ApplicationUserId = userId,
                     GymClassId = currentGymClass.Id
                 };
-                unitOfWork.AppUserGymRepo.Add(book);
+                unitOfWork.UserGymClasses.Add(book);
                 await unitOfWork.CompleteAsync();
             }
 
             //Annars avboka
             else
             {
-                unitOfWork.AppUserGymRepo.Remove(attending);
+                unitOfWork.UserGymClasses.Remove(attending);
                 await unitOfWork.CompleteAsync();
             }
 
@@ -101,7 +106,7 @@ namespace GymBooking.Controllers
                 return NotFound();
             }
 
-            GymClass gymClass = await unitOfWork.GymRepo.GetAsync(id);
+            GymClass gymClass = await unitOfWork.GymClasses.GetAsync(id);
             if (gymClass == null)
             {
                 return NotFound();
@@ -111,9 +116,10 @@ namespace GymBooking.Controllers
         }
 
         // GET: GymClasses/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
-            return View();
+            return PartialView("CreatePartial");
         }
 
         // POST: GymClasses/Create
@@ -126,11 +132,25 @@ namespace GymBooking.Controllers
         {
             if (ModelState.IsValid)
             {
-                unitOfWork.GymRepo.Add(gymClass);
+                unitOfWork.GymClasses.Add(gymClass);
                 await unitOfWork.CompleteAsync();
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    ////Get all
+                    //var gymClasses = await.unityOfWork.GymClasses.GetAllWithUsersAsync();
+                    //var vm = new IndexViewModel {GymClasses = gymClasses };
+                    //return PartialView("GymClassesPartial", vm);
+
+                    ////Get one
+                    var model = await unitOfWork.GymClasses.GetWithAttendingMembersAsync(gymClass.Id);
+                    return PartialView(nameof(Index));
+                }
                 return RedirectToAction(nameof(Index));
             }
+
             return View(gymClass);
+            
         }
 
         // GET: GymClasses/Edit/5
@@ -142,7 +162,7 @@ namespace GymBooking.Controllers
                 return NotFound();
             }
 
-            var gymClass = await unitOfWork.GymRepo.GetAsync(id);
+            var gymClass = await unitOfWork.GymClasses.GetAsync(id);
             if (gymClass == null)
             {
                 return NotFound();
@@ -167,7 +187,7 @@ namespace GymBooking.Controllers
             {
                 try
                 {
-                    unitOfWork.GymRepo.Update(gymClass);
+                    unitOfWork.GymClasses.Update(gymClass);
                     await unitOfWork.CompleteAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -195,7 +215,7 @@ namespace GymBooking.Controllers
                 return NotFound();
             }
 
-            var gymClass = await unitOfWork.GymRepo.GetAsync(id);
+            var gymClass = await unitOfWork.GymClasses.GetAsync(id);
             if (gymClass == null)
             {
                 return NotFound();
@@ -209,8 +229,8 @@ namespace GymBooking.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var gymClass = await unitOfWork.GymRepo.GetAsync(id);
-            unitOfWork.GymRepo.Remove(gymClass);
+            var gymClass = await unitOfWork.GymClasses.GetAsync(id);
+            unitOfWork.GymClasses.Remove(gymClass);
             await unitOfWork.CompleteAsync();
             
             return RedirectToAction(nameof(Index));
@@ -218,9 +238,7 @@ namespace GymBooking.Controllers
 
         private bool GymClassExists(int id)
         {
-            return unitOfWork.GymRepo.GetAny(id);
+            return unitOfWork.GymClasses.GetAny(id);
         }
-
-        
     }
 }

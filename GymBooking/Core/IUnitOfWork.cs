@@ -6,8 +6,8 @@ namespace GymBooking.Core
     public interface IUnitOfWork
     {
         
-        IApplicationUserGymClassesRepository AppUserGymRepo { get; }
-        IGymClassesRepository GymRepo { get; }
+        IApplicationUserGymClassesRepository UserGymClasses { get; }
+        IGymClassesRepository GymClasses { get; }
 
         Task CompleteAsync();
     }

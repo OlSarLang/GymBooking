@@ -22,7 +22,7 @@ namespace GymBooking.Core
             return _context.GymClasses.Any(e => e.Id == id);
         }
 
-        public async Task<GymClass> GetWithMembersAsync(int? id)
+        public async Task<GymClass> GetWithAttendingMembersAsync(int? id)
         {
             return await _context.GymClasses
                 .Include(a => a.AttendingMembers)
@@ -67,7 +67,10 @@ namespace GymBooking.Core
         {
             _context.Update(gymClass);
         }
+
+        public async Task<IEnumerable<GymClass>> GetAllAsync()
+        {
+            return await _context.GymClasses.ToListAsync();
+        }
     }
-
-
 }

@@ -9,8 +9,16 @@
 
 @if (User.IsInRole("Admin"))
 {
+
+    <p id="createform">
+        <a asp-action="Create"
+           data-ajax="true"
+           data-ajax--method="GET"
+           data-ajax-mode="replace"
+           data-ajax-update="#createform">Create New</a>
+    </p>
     <p>
-        <a asp-action="Create">Create New</a>
+        <a asp-action="Create">Create New Old</a>
     </p>
 }
 
@@ -39,7 +47,7 @@
             <th></th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="gymclassesupdate">
         <partial name="_GymClassesPartial" />
     </tbody>
 </table>

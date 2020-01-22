@@ -9,14 +9,14 @@ namespace GymBooking.Core
     public class UnitOfWork : IUnitOfWork
     {
         public ApplicationDbContext _context { get; }
-        public IGymClassesRepository GymRepo { get; private set; }
-        public IApplicationUserGymClassesRepository AppUserGymRepo { get; private set; }
+        public IGymClassesRepository GymClasses { get; private set; }
+        public IApplicationUserGymClassesRepository UserGymClasses { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
-            GymRepo = new GymClassesRepository(_context);
-            AppUserGymRepo = new ApplicationUserGymClassesRepository(_context);
+            GymClasses = new GymClassesRepository(_context);
+            UserGymClasses = new ApplicationUserGymClassesRepository(_context);
         }
 
         public async Task CompleteAsync()

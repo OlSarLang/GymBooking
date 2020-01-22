@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GymBooking", "GymBooking\GymBooking.csproj", "{8CF48AFD-0204-4C8C-A8F0-EA36109007BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GymBooking", "GymBooking\GymBooking.csproj", "{8CF48AFD-0204-4C8C-A8F0-EA36109007BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GymBookingTests", "GymBookingTests\GymBookingTests.csproj", "{8AF960CF-4C98-4C00-83E8-15EEF963D8DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{8CF48AFD-0204-4C8C-A8F0-EA36109007BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CF48AFD-0204-4C8C-A8F0-EA36109007BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CF48AFD-0204-4C8C-A8F0-EA36109007BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AF960CF-4C98-4C00-83E8-15EEF963D8DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AF960CF-4C98-4C00-83E8-15EEF963D8DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AF960CF-4C98-4C00-83E8-15EEF963D8DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AF960CF-4C98-4C00-83E8-15EEF963D8DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
